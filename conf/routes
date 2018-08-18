@@ -530,20 +530,23 @@ POST  /api/bot/game/:id/move/:uci      controllers.Bot.move(id: String, uci: Str
 POST  /api/bot/*cmd                    controllers.Bot.command(cmd: String)
 
 # Account
-GET   /account/passwd                  controllers.Account.passwd
-POST  /account/passwd                  controllers.Account.passwdApply
-GET   /account/email                   controllers.Account.email
-POST  /account/email                   controllers.Account.emailApply
-GET   /account/email/confirm/:token    controllers.Account.emailConfirm(token: String)
-GET   /account/close                   controllers.Account.close
-POST  /account/closeConfirm            controllers.Account.closeConfirm
-GET   /account/profile                 controllers.Account.profile
-POST  /account/profile                 controllers.Account.profileApply
-GET   /account/kid                     controllers.Account.kid
-POST  /account/kid                     controllers.Account.kidPost
-GET   /account/twofactor               controllers.Account.twoFactor
-POST  /account/twofactor/setup         controllers.Account.setupTwoFactor
-POST  /Account/twofactor/disable       controllers.Account.disableTwoFactor
+GET   /account/passwd                   controllers.Account.passwd
+POST  /account/passwd                   controllers.Account.passwdApply
+GET   /account/email                    controllers.Account.email
+POST  /account/email                    controllers.Account.emailApply
+GET   /account/email/confirm/:token     controllers.Account.emailConfirm(token: String)
+GET   /account/close                    controllers.Account.close
+POST  /account/closeConfirm             controllers.Account.closeConfirm
+GET   /account/profile                  controllers.Account.profile
+POST  /account/profile                  controllers.Account.profileApply
+GET   /account/kid                      controllers.Account.kid
+POST  /account/kid                      controllers.Account.kidPost
+GET   /account/twofactor                controllers.Account.twoFactor
+POST  /account/twofactor/setup          controllers.Account.setupTwoFactor
+POST  /account/twofactor/disable        controllers.Account.disableTwoFactor
+GET   /account/twofactor/recovery-codes controllers.Account.twoFactorRecoveryCodes
+POST  /account/twofactor/recovery-codes controllers.Account.generateTwoFactorRecoveryCodes
+
 # App BC
 POST  /account/kidConfirm              controllers.Account.kidToggle
 GET   /account/security                controllers.Account.security

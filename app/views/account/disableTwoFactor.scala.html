@@ -6,6 +6,7 @@
 <div class="content_box small_box high twofactor">
   <h1 class="lichess_title"><i data-icon="E" class="is-green"></i> Two-factor authentication enabled</h1>
   <p class="explanation">Your account is protected with two-factor authentication.</p>
+  <a class="submit button text" href=@routes.Account.twoFactorRecoveryCodes>View recovery codes</a>
   <form class="material form" action="@routes.Account.disableTwoFactor" method="POST">
     <p class="explanation">You need your password and an authentication code from your authenticator app to disable two-factor authentication.</p>
     @passwdFormField(form("passwd"), trans.password())

@@ -29,7 +29,8 @@ case class User(
     plan: Plan,
     reportban: Boolean = false,
     rankban: Boolean = false,
-    totpSecret: Option[TotpSecret] = None
+    totpSecret: Option[TotpSecret] = None,
+    twoFactorRecoveryCodes: Option[TwoFactorRecoveryCodes] = None
 ) extends Ordered[User] {
 
   override def equals(other: Any) = other match {
@@ -67,6 +68,8 @@ case class User(
   def countRated = count.rated
 
   def hasTitle = title.isDefined
+
+  def has2FAEnabled = totpSecret.isDefined
 
   lazy val seenRecently: Boolean = timeNoSee < 2.minutes
 
@@ -243,6 +246,7 @@ object User {
     val bpass = "bpass"
     val sha512 = "sha512"
     val totpSecret = "totp"
+    val twoFactorRecoveryCodes = "twoFactorRecoveryCodes"
   }
 
   import lila.db.BSON
@@ -257,6 +261,7 @@ object User {
     private implicit def perfsHandler = Perfs.perfsBSONHandler
     private implicit def planHandler = Plan.planBSONHandler
     private implicit def totpSecretHandler = TotpSecret.totpSecretBSONHandler
+    private implicit def twoFactorRecoveryCodesHandler = TwoFactorRecoveryCodes.twoFactorRecoveryCodesBSONHandler
 
     def reads(r: BSON.Reader): User = User(
       id = r str id,
@@ -280,7 +285,8 @@ object User {
       plan = r.getO[Plan](plan) | Plan.empty,
       reportban = r boolD reportban,
       rankban = r boolD rankban,
-      totpSecret = r.getO[TotpSecret](totpSecret)
+      totpSecret = r.getO[TotpSecret](totpSecret),
+      twoFactorRecoveryCodes = r.getO[TwoFactorRecoveryCodes](twoFactorRecoveryCodes)
     )
 
     def writes(w: BSON.Writer, o: User) = BSONDocument(
@@ -305,7 +311,8 @@ object User {
       plan -> o.plan.nonEmpty,
       reportban -> w.boolO(o.reportban),
       rankban -> w.boolO(o.rankban),
-      totpSecret -> o.totpSecret
+      totpSecret -> o.totpSecret,
+      twoFactorRecoveryCodes -> o.twoFactorRecoveryCodes
     )
   }
 }

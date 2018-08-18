@@ -297,13 +297,26 @@ object UserRepo {
 
   def setRoles(id: ID, roles: List[String]) = coll.updateField($id(id), "roles", roles)
 
-  def disableTwoFactor(id: ID) = coll.update($id(id), $unset(F.totpSecret))
+  def disableTwoFactor(id: ID) = coll.update($id(id), $unset(F.totpSecret) ++ $unset(F.twoFactorRecoveryCodes))
 
-  def setupTwoFactor(id: ID, totp: TotpSecret): Funit =
+  def setupTwoFactor(id: ID, totp: TotpSecret, recoveryCodes: TwoFactorRecoveryCodes): Funit =
     coll.update(
       $id(id) ++ (F.totpSecret $exists false), // never overwrite existing secret
-      $set(F.totpSecret -> totp.secret)
+      $set(F.totpSecret -> totp.secret) ++ $set(F.twoFactorRecoveryCodes -> recoveryCodes.codes)
     ).void
+
+  def generateTwoFactorRecoveryCodes(user: User): Funit = {
+    if (user.has2FAEnabled) {
+      val oldCodes: Set[String] = user.twoFactorRecoveryCodes.map { _.codes } getOrElse Set()
+      val recoveryCodes = TwoFactorRecoveryCodes.createWithDifferentCodes(oldCodes)
+      coll.update(
+        $id(user.id),
+        $set(F.twoFactorRecoveryCodes -> recoveryCodes.codes)
+      ).void
+    } else fufail(
+      new TwoFactorRecoveryCodesError("You may not update recovery codes. Enable 2FA first.")
+    )
+  }
 
   def enable(id: ID) = coll.updateField($id(id), F.enabled, true)
 

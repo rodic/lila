@@ -1,0 +1,27 @@
+@(u: User)(implicit ctx: Context)
+
+@title = @{ s"${u.username} - Two-factor authentication" }
+
+@account.layout(title = title, active = "twofactor", evenMoreCss = cssTag("material.form.css")) {
+  <div class="content_box small_box high twofactor">
+    <h1 class="lichess_title"><i data-icon="E" class="is-green"></i> Two-factor authentication enabled</h1>
+    <p class="explanation">Your account is protected with two-factor authentication.</p>
+    <h1 class="lichess_title">Recovery codes</h1>
+    <p class="explanation">Recovery codes can be used to access your account in the event you lose access to your device and cannot receive two-factor authentication codes.</p>
+    @if(u.twoFactorRecoveryCodes.isNotEmpty) {
+      <p class="explanation">To keep your account secure, don't share or distribute your recovery codes.</p>
+      <div class="material content_box high security">
+        <ul>
+          @u.twoFactorRecoveryCodes.mapCodes { code => <li>@code</li> }
+        </ul>
+      </div>
+    } else {
+      <p class="explanation">You don't have security codes associated with your account.</p>
+    }
+    <form class="material form" action="@routes.Account.generateTwoFactorRecoveryCodes" method="POST">
+      <div class="button-container">
+        <button type="submit" class="submit button text">Update recovery codes</button>
+      </div>
+    </form>
+  </div>
+}

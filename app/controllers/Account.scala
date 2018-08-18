@@ -6,7 +6,7 @@ import play.api.mvc._
 import lila.api.Context
 import lila.app._
 import lila.common.LilaCookie
-import lila.user.{ User => UserModel, UserRepo, TotpSecret }
+import lila.user.{ User => UserModel, UserRepo, TotpSecret, TwoFactorRecoveryCodes, TwoFactorRecoveryCodesError }
 import UserModel.{ ClearPassword, TotpToken, PasswordAndToken }
 import views.html
 
@@ -174,6 +174,21 @@ object Account extends LilaController {
       }
   }
 
+  def twoFactorRecoveryCodes = Auth { implicit ctx => me =>
+    if (me.has2FAEnabled)
+      Ok(html.account.twoFactorRecoveryCodes(me)).fuccess
+    else
+      Redirect(routes.Account.twoFactor).fuccess
+  }
+
+  def generateTwoFactorRecoveryCodes = Auth { implicit ctx => me =>
+    UserRepo.generateTwoFactorRecoveryCodes(me)
+      .inject(Redirect(routes.Account.twoFactorRecoveryCodes))
+      .recover {
+        case e: TwoFactorRecoveryCodesError => BadRequest(e.getMessage)
+      }
+  }
+
   def setupTwoFactor = AuthBody { implicit ctx => me =>
     controllers.Auth.HasherRateLimit(me.username, ctx.req) { _ =>
       implicit val req = ctx.body
@@ -182,9 +197,9 @@ object Account extends LilaController {
         FormFuResult(form) { err =>
           fuccess(html.account.setupTwoFactor(me, err))
         } { data =>
-          UserRepo.setupTwoFactor(me.id, TotpSecret(data.secret)) >>
+          UserRepo.setupTwoFactor(me.id, TotpSecret(data.secret), TwoFactorRecoveryCodes()) >>
             lila.security.Store.closeUserExceptSessionId(me.id, currentSessionId) inject
-            Redirect(routes.Account.twoFactor)
+            Redirect(routes.Account.twoFactorRecoveryCodes)
         }
       }
     }
